@@ -6,9 +6,8 @@ Author: Arkadiusz Modzelewski
 
 # import libraries
 import os
-import imgkit
 import pandas as pd
-from pandas.plotting import table
+import seaborn as sns
 from matplotlib import pyplot as plt
 
 os.environ['QT_QPA_PLATFORM'] = 'offscreen'
@@ -27,6 +26,43 @@ def import_data(pth: str) -> pd.DataFrame:
     return dataframe
 
 
+def plot_histogram(dataframe: pd.DataFrame, density: bool, column: str, title: str,
+                   xlabel: str, ylabel: str, output_path: str) -> None:
+    """
+    Plot the histogram
+
+    :param dataframe:
+    :param density:
+
+
+    """
+    plt.figure(figsize=(20, 10))
+    if density:
+        sns.histplot(dataframe[column], stat='density', kde=True)
+    else:
+        sns.histplot(dataframe[column])
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    # Save the histogram
+    plt.savefig(output_path)
+
+
+def plot_barplot(x: list, y: list, title: str, xlabel: str, ylabel: str, output_path: str) -> None:
+    """
+    Plot the histogram
+
+
+    """
+    plt.figure(figsize=(20, 10))
+    sns.barplot(x=x, y=y)
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    # Save the histogram
+    plt.savefig(output_path)
+
+
 def perform_eda(dataframe: pd.DataFrame, output_path: str) -> None:
     """
     perform eda on df and save figures to images folder
@@ -36,7 +72,29 @@ def perform_eda(dataframe: pd.DataFrame, output_path: str) -> None:
     output:
             None
     """
-    pass
+    dataframe['Churn'] = dataframe['Attrition_Flag'].apply(
+        lambda val: 0 if val == "Existing Customer" else 1
+    )
+    plot_histogram(
+        dataframe=dataframe, density=False, column="Churn", title="Churn Histogram", xlabel="Label",
+        ylabel="Number of observations", output_path=output_path + "Churn_Histogram.png"
+    )
+    plot_histogram(
+        dataframe=dataframe, density=False, column="Customer_Age", title="Customer_Age Histogram",
+        xlabel="Customer Age", ylabel="Number of observations",
+        output_path=output_path + "Customer_Age_Histogram.png"
+    )
+    plot_histogram(
+        dataframe=dataframe, density=False, column="Total_Trans_Ct",
+        title="Total_Trans_Ct Histogram", xlabel="Total Trans_Ct", ylabel="Density",
+        output_path=output_path + "Total_Trans_Ct_Histogram.png"
+    )
+    plot_barplot(
+        x=list(df.Marital_Status.value_counts('normalize').index),
+        y=list(df.Marital_Status.value_counts('normalize').values),
+        title="Marital_Status Bar Plot", xlabel="Marital Status", ylabel="Percentage",
+        output_path=output_path + "Marital_Status_Barplot.png"
+    )
 
 
 def encoder_helper(dataframe, category_lst, response):
@@ -125,3 +183,4 @@ def train_models(X_train, X_test, y_train, y_test):
 
 if __name__ == '__main__':
     df = import_data("data/bank_data.csv")
+    perform_eda(dataframe=df, output_path="images/eda/")
