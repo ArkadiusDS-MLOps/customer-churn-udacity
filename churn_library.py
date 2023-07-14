@@ -9,7 +9,10 @@ import os
 import pandas as pd
 import seaborn as sns
 from matplotlib import pyplot as plt
-from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import classification_report, plot_roc_curve
+from sklearn.model_selection import train_test_split, GridSearchCV
 
 os.environ['QT_QPA_PLATFORM'] = 'offscreen'
 
@@ -75,6 +78,21 @@ def plot_corr_heatmap(dataframe: pd.DataFrame, output_path: str) -> None:
     plt.figure(figsize=(20, 10))
     sns.heatmap(dataframe.corr(), annot=False, cmap='Dark2_r', linewidths=2)
     # Save the histogram
+    plt.savefig(output_path)
+
+
+def plot_roc_curves(rfc, lr, output_path: str) -> None:
+    """
+    Plot correlation heatmap
+
+    :param dataframe: pandas dataframe
+    :param output_path: path for the output plot
+
+    """
+    plt.figure(figsize=(20, 10))
+    ax = plt.gca()
+    rfc_disp = plot_roc_curve(rfc.best_estimator_, X_test, y_test, ax=ax, alpha=0.8)
+    lr.plot(ax=ax, alpha=0.8)
     plt.savefig(output_path)
 
 
@@ -158,12 +176,8 @@ def perform_feature_engineering(dataframe, keep_cols):
     return X_train, X_test, y_train, y_test
 
 
-def classification_report_image(y_train,
-                                y_test,
-                                y_train_preds_lr,
-                                y_train_preds_rf,
-                                y_test_preds_lr,
-                                y_test_preds_rf):
+def classification_report_image(y_train, y_test, y_train_preds_lr,
+                                y_train_preds_rf, y_test_preds_lr, y_test_preds_rf):
     """
     produces classification report for training and testing results and stores report as image
     in images folder
@@ -178,7 +192,34 @@ def classification_report_image(y_train,
     output:
              None
     """
-    pass
+    # Create a single figure with a 2x2 grid
+    fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(20, 20))
+
+    # Train Classification Report - Logistic Regression
+    clf_report_train_lr = classification_report(y_train, y_train_preds_lr, output_dict=True)
+    sns.heatmap(pd.DataFrame(clf_report_train_lr).iloc[:-1, :].T, annot=True, ax=axes[0, 0])
+    axes[0, 0].set_title('Train Classification Report - Logistic Regression')
+
+    # Test Classification Report - Logistic Regression
+    clf_report_test_lr = classification_report(y_test, y_test_preds_lr, output_dict=True)
+    sns.heatmap(pd.DataFrame(clf_report_test_lr).iloc[:-1, :].T, annot=True, ax=axes[0, 1])
+    axes[0, 1].set_title('Test Classification Report - Logistic Regression')
+
+    # Train Classification Report - Random Forest
+    clf_report_train_rf = classification_report(y_train, y_train_preds_rf, output_dict=True)
+    sns.heatmap(pd.DataFrame(clf_report_train_rf).iloc[:-1, :].T, annot=True, ax=axes[1, 0])
+    axes[1, 0].set_title('Train Classification Report - Random Forest')
+
+    # Test Classification Report - Random Forest
+    clf_report_test_rf = classification_report(y_test, y_test_preds_rf, output_dict=True)
+    sns.heatmap(pd.DataFrame(clf_report_test_rf).iloc[:-1, :].T, annot=True, ax=axes[1, 1])
+    axes[1, 1].set_title('Test Classification Report - Random Forest')
+
+    # Adjust spacing between subplots
+    plt.tight_layout()
+
+    # Save the classification report image
+    plt.savefig("images/results/classification_report.png")
 
 
 def feature_importance_plot(model, X_data, output_pth):
@@ -194,6 +235,12 @@ def feature_importance_plot(model, X_data, output_pth):
     """
     pass
 
+def hyperparameter_optimization(X_train, y_train, model, param_dict):
+
+    cv_rfc = GridSearchCV(estimator=model, param_grid=param_dict, cv=5)
+    cv_rfc.fit(X_train, y_train)
+
+    return cv_rfc
 
 def train_models(X_train, X_test, y_train, y_test):
     """
@@ -206,7 +253,37 @@ def train_models(X_train, X_test, y_train, y_test):
     output:
               None
     """
-    pass
+
+    rfc = RandomForestClassifier(random_state=42)
+    lrc = LogisticRegression(solver='lbfgs', max_iter=3000)
+
+    lrc.fit(X_train, y_train)
+
+    param_grid = {
+        'n_estimators': [200, 500],
+        'max_features': ['auto', 'sqrt'],
+        'max_depth': [4, 5, 100],
+        'criterion': ['gini', 'entropy']
+    }
+
+    rfc = hyperparameter_optimization(
+        X_train=X_train, y_train=y_train, model=rfc, param_dict=param_grid
+    )
+
+    y_train_preds_rf = rfc.best_estimator_.predict(X_train)
+    y_test_preds_rf = rfc.best_estimator_.predict(X_test)
+
+    y_train_preds_lr = lrc.predict(X_train)
+    y_test_preds_lr = lrc.predict(X_test)
+
+    # scores
+    classification_report_image(
+        y_train, y_test, y_train_preds_lr, y_train_preds_rf, y_test_preds_lr, y_test_preds_rf
+    )
+
+    # plot roc curve
+    plot_roc_curves(rfc=rfc, lr=lrc, output_path="images/results/roc_curves.png")
+
 
 
 if __name__ == '__main__':
@@ -231,4 +308,8 @@ if __name__ == '__main__':
                     'Gender_Churn', 'Education_Level_Churn', 'Marital_Status_Churn',
                     'Income_Category_Churn', 'Card_Category_Churn']
 
-    perform_feature_engineering(dataframe=df, keep_cols=cols_to_keep)
+    X_train, X_test, y_train, y_test = perform_feature_engineering(
+        dataframe=df, keep_cols=cols_to_keep
+    )
+
+    train_models(X_train, X_test, y_train, y_test)
