@@ -6,6 +6,9 @@ Author: Arkadiusz Modzelewski
 
 # import libraries
 import os
+
+import joblib
+import numpy as np
 import pandas as pd
 import seaborn as sns
 from matplotlib import pyplot as plt
@@ -222,7 +225,7 @@ def classification_report_image(y_train, y_test, y_train_preds_lr,
     plt.savefig("images/results/classification_report.png")
 
 
-def feature_importance_plot(model, X_data, output_pth):
+def feature_importance_plot(model, X_data):
     """
     creates and stores the feature importances in pth
     input:
@@ -233,14 +236,40 @@ def feature_importance_plot(model, X_data, output_pth):
     output:
              None
     """
-    pass
+    # Calculate feature importances
+    importances = model.best_estimator_.feature_importances_
+    # Sort feature importances in descending order
+    indices = np.argsort(importances)[::-1]
+
+    # Rearrange feature names so they match the sorted feature importances
+    names = [X_data.columns[i] for i in indices]
+
+    # Create plot
+    plt.figure(figsize=(20, 5))
+
+    # Create plot title
+    plt.title("Feature Importance")
+    plt.ylabel('Importance')
+
+    # Add bars
+    plt.bar(range(X_data.shape[1]), importances[indices])
+    # Add feature names as x-axis labels
+    plt.xticks(range(X_data.shape[1]), names, rotation=90)
+
+    # Save the feature importance plot
+    plt.savefig("images/results/feature_importance_plot.png")
+
 
 def hyperparameter_optimization(X_train, y_train, model, param_dict):
+    """
+    Perform hyperparameter optimization for model
+    """
 
     cv_rfc = GridSearchCV(estimator=model, param_grid=param_dict, cv=5)
     cv_rfc.fit(X_train, y_train)
 
     return cv_rfc
+
 
 def train_models(X_train, X_test, y_train, y_test):
     """
@@ -284,6 +313,11 @@ def train_models(X_train, X_test, y_train, y_test):
     # plot roc curve
     plot_roc_curves(rfc=rfc, lr=lrc, output_path="images/results/roc_curves.png")
 
+    feature_importance_plot(rfc, X_data=X_train)
+
+    # save best model
+    joblib.dump(rfc.best_estimator_, './models/rfc_model.pkl')
+    joblib.dump(lrc, './models/logistic_model.pkl')
 
 
 if __name__ == '__main__':
