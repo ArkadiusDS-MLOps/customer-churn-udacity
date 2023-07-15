@@ -65,7 +65,7 @@ class ChurnModel:
         numerical_features = self.dataframe.select_dtypes(
             include=['int64', 'float64']
         ).columns.tolist()
-        print(numerical_features)
+
         for num_feature in numerical_features:
             plot_histogram(
                 dataframe=self.dataframe,
@@ -79,3 +79,27 @@ class ChurnModel:
                 column=cat_feature,
                 output_path=self.eda_output_path
             )
+
+    def encode_cat_features(self, category_list: list) -> pd.DataFrame:
+        """
+        Turn each categorical column into a new column with
+        proportion of churn for each category - associated with cell 15 from the notebook
+
+        Parameters:
+            self: The instance of the class
+            category_list: list of columns that contain categorical features
+        Returns:
+            None
+
+        """
+
+        for column in category_list:
+
+            values_lst = []
+            values_groups = self.dataframe.groupby(column).mean()['Churn']
+
+            for val in self.dataframe[column]:
+                values_lst.append(values_groups.loc[val])
+
+            response_col = column + "_Churn"
+            self.dataframe[response_col] = values_lst
