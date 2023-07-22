@@ -1,5 +1,7 @@
 """
+Helper functions for training and models evaluation
 
+Author: Arkadiusz Modzelewski
 """
 import numpy as np
 import pandas as pd
@@ -12,12 +14,23 @@ from sklearn.model_selection import GridSearchCV
 def hyperparameter_optimization(x_train, y_train, model, param_dict):
     """
     Perform hyperparameter optimization for model
+
+    Parameters:
+        x_train: dataframe with independent variables
+        y_train: target used for training
+        model: instance of the model in this case random forest
+        param_dict: dictionary with hyperparameters and values for grid search
+
+    Returns:
+        rfc: the best estimator after grid search optimization
+
     """
 
     cv_rfc = GridSearchCV(estimator=model, param_grid=param_dict, cv=5)
     cv_rfc.fit(x_train, y_train)
+    rfc = cv_rfc.best_estimator_
 
-    return cv_rfc.best_estimator_
+    return rfc
 
 
 def classification_report_image(
@@ -30,18 +43,21 @@ def classification_report_image(
         output_path
 ):
     """
-    produces classification report for training and testing results and stores report as image
-    in images folder
-    input:
+    Produces classification report for training and testing results and
+    stores report as image in images folder
+
+    Parameters:
             y_train: training response values
             y_test:  test response values
             y_train_pred_lr: training predictions from logistic regression
             y_train_pred_rf: training predictions from random forest
             y_test_pred_lr: test predictions from logistic regression
             y_test_pred_rf: test predictions from random forest
+            output_path: path to store the figure
 
-    output:
+    Returns:
              None
+
     """
     # Create a single figure with a 2x2 grid
     _, axes = plt.subplots(nrows=2, ncols=2, figsize=(20, 20))
@@ -83,17 +99,17 @@ def classification_report_image(
 
 def plot_roc_comparison(rfc, lrc, x_test, y_test, output_path: str) -> None:
     """
-    Plot roc curves comparison
+    Plot roc curves comparison for Random Forest and Logistic Regression model
 
-    input:
-            rfc:
-            lrc:
-            x_test:
-            y_test:
-            output_path:
+    Parameters:
+        rfc: Instance of Random Forest model
+        lrc: Instance of Logistic Regression model
+        x_test: dataframe with independent variables for testing purposes
+        y_test: series with dependent variable for testing purposes
+        output_path: path to store the figure
 
-    output:
-            None
+    Returns:
+        None
 
     """
     plt.figure(figsize=(20, 10))
@@ -118,14 +134,16 @@ def plot_roc_comparison(rfc, lrc, x_test, y_test, output_path: str) -> None:
 
 def feature_importance_plot(model, x_data, output_path):
     """
-    creates and stores the feature importances in pth
-    input:
-            model: model object containing feature_importances_
-            x_data: pandas dataframe of X values
-            output_pth: path to store the figure
+    Creates and stores the feature importances in path
 
-    output:
+    Parameters:
+        model: model object containing feature_importances_
+        x_data: pandas dataframe of X values
+        output_path: path to store the figure
+
+    Returns:
              None
+
     """
     # Calculate feature importance
     importance = model.feature_importances_
