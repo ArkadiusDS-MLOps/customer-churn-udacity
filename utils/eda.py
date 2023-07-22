@@ -54,3 +54,21 @@ def plot_barplot(dataframe: pd.DataFrame,
     plt.ylabel("Percentage")
     # Save the histogram
     plt.savefig(output_path + column + "BarPlot.png")
+
+
+def plot_corr_heatmap(dataframe: pd.DataFrame, output_path: str) -> None:
+    """
+    Plot correlation heatmap
+
+    input:
+            dataframe: pandas dataframe
+            output_path: path for the output plot
+
+    output:
+            None
+    """
+
+    plt.figure(figsize=(20, 20))
+    sns.heatmap(dataframe.corr(), annot=False, cmap='Dark2_r', linewidths=2)
+    # Save the histogram
+    plt.savefig(output_path)
