@@ -4,6 +4,7 @@ Includes Churn Class that is used for churn modelling
 import logging
 
 import pandas as pd
+from sklearn.model_selection import train_test_split
 
 from utils.eda import plot_histogram, plot_barplot
 
@@ -23,6 +24,12 @@ class ChurnModel:
         self.eda_output_path = eda_output_path
         self.results_output_path = results_output_path
         self.dataframe = None
+        self.categorical_features = None
+        self.numerical_features = None
+        self.x_train = None
+        self.x_test = None
+        self.y_train = None
+        self.y_test = None
 
     def import_data(self) -> pd.DataFrame:
         """
@@ -57,23 +64,23 @@ class ChurnModel:
         """
 
         # Select categorical features
-        categorical_features = self.dataframe.select_dtypes(
+        self.categorical_features = self.dataframe.select_dtypes(
             include=['object']
         ).columns.tolist()
 
         # Select numerical features
-        numerical_features = self.dataframe.select_dtypes(
+        self.numerical_features = self.dataframe.select_dtypes(
             include=['int64', 'float64']
         ).columns.tolist()
 
-        for num_feature in numerical_features:
+        for num_feature in self.numerical_features:
             plot_histogram(
                 dataframe=self.dataframe,
                 column=num_feature,
                 output_path=self.eda_output_path
             )
 
-        for cat_feature in categorical_features:
+        for cat_feature in self.categorical_features:
             plot_barplot(
                 dataframe=self.dataframe,
                 column=cat_feature,
@@ -103,3 +110,21 @@ class ChurnModel:
 
             response_col = column + "_Churn"
             self.dataframe[response_col] = values_lst
+
+    def perform_feature_engineering(self, cols_to_keep: list) -> None:
+        """
+        Perform feature engineering and split data into train and test data
+
+        Parameters:
+            self: The instance of the class
+            cols_to_keep: List of columns to keep for training
+        Returns:
+            None
+
+        """
+        y_dependent = self.dataframe['Churn']
+        x_features = self.dataframe[cols_to_keep]
+
+        self.x_train, self.x_test, self.y_train, self.y_test = train_test_split(
+            x_features, y_dependent, test_size=0.3, random_state=42
+        )
