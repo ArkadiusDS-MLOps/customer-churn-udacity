@@ -13,9 +13,9 @@ os.environ['QT_QPA_PLATFORM'] = 'offscreen'
 
 if __name__ == '__main__':
 
-    churn = ChurnModel(data_path="data/bank_data.csv")
+    churn = ChurnModel()
     # Import data for churn modelling
-    churn.import_data()
+    churn.import_data(data_path="data/bank_data.csv")
     # Perform EDA
     churn.perform_eda()
     # Encoding categorical features

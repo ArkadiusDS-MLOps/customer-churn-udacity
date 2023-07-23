@@ -1,5 +1,7 @@
 """
 Helper functions for EDA
+
+Author: Arkadiusz Modzelewski
 """
 
 import pandas as pd
@@ -44,11 +46,11 @@ def plot_barplot(dataframe: pd.DataFrame,
     output:
             None
     """
-    x = list(dataframe[column].value_counts('normalize').index)
-    y = list(dataframe[column].value_counts('normalize').values)
+    x_axis = list(dataframe[column].value_counts('normalize').index)
+    y_axis = list(dataframe[column].value_counts('normalize').values)
 
     plt.figure(figsize=(20, 10))
-    sns.barplot(x=x, y=y)
+    sns.barplot(x=x_axis, y=y_axis)
     plt.title(column + " Bar Plot")
     plt.xlabel(column)
     plt.ylabel("Percentage")

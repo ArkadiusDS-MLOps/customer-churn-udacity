@@ -1,5 +1,7 @@
 """
 Includes Churn Class that is used for churn modelling
+
+Author: Arkadiusz Modzelewski
 """
 import logging
 
@@ -22,12 +24,11 @@ class ChurnModel:
 
     """
 
-    def __init__(self, data_path: str):
+    def __init__(self):
         """
         Class init method or constructor
         """
 
-        self.data_path = data_path
         self.dataframe = None
         self.categorical_features = None
         self.numerical_features = None
@@ -36,18 +37,19 @@ class ChurnModel:
         self.y_train = None
         self.y_test = None
 
-    def import_data(self) -> pd.DataFrame:
+    def import_data(self, data_path: str) -> pd.DataFrame:
         """
         Returns dataframe for the csv found at pth
 
         Parameters:
             self: The instance of the class
+            data_path: path to file where data is stored
         Returns:
             dataframe: pandas dataframe
 
         """
         try:
-            self.dataframe = pd.read_csv(self.data_path)
+            self.dataframe = pd.read_csv(data_path)
             self.dataframe['Churn'] = self.dataframe['Attrition_Flag'].apply(
                 lambda val: 0 if val == "Existing Customer" else 1
             )
@@ -142,7 +144,8 @@ class ChurnModel:
 
     def train_models(self, results_output_path="images/results/", models_path="./models/"):
         """
-        train, store model results: images + scores, and store models
+        Train, store model results: images + scores, and store models
+
         Parameters:
             self: The instance of the class
             results_output_path: path to directory with results plots
@@ -158,9 +161,9 @@ class ChurnModel:
 
         param_grid = {
             'n_estimators': [200, 500],
-            # 'max_features': ['auto', 'sqrt'],
-            # 'max_depth': [4, 5, 100],
-            # 'criterion': ['gini', 'entropy']
+            'max_features': ['auto', 'sqrt'],
+            'max_depth': [4, 5, 100],
+            'criterion': ['gini', 'entropy']
         }
 
         rfc = hyperparameter_optimization(
