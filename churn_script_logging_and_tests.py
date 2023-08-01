@@ -4,6 +4,9 @@ Tests and logging for churn modelling methods and functions
 Author: Arkadiusz Modzelewski
 """
 import logging
+
+import numpy as np
+import pandas as pd
 import pytest
 import churn_model as cls
 from unittest.mock import patch, MagicMock
@@ -68,20 +71,21 @@ def test_import_check_dropped_cols(imported_data):
         )
         raise err
 
-# Mocked Dataframe for testing
+
 @pytest.fixture
-def mocked_dataframe():
-    # Create a mock dataframe with test data
-    # Replace this with a real dataframe containing test data
-    import pandas as pd
+def churn_model_instance():
+    # Create an instance of ChurnModel
+    churn_model_instance = cls.ChurnModel()
 
+    # Sample data for testing
     data = {
-        "Column1": [1, 2, 3],
-        "Column2": ["A", "B", "C"],
-        "Churn": [0, 1, 1],
+        'Category1': ['A', 'B', 'A', 'C', 'B', 'C', 'A', 'B'],
+        'Category2': ['X', 'Y', 'X', 'Z', 'X', 'Z', 'X', 'Y'],
+        'Churn': [1, 0, 0, 1, 1, 0, 0, 1]
     }
+    churn_model_instance.dataframe = pd.DataFrame(data)
 
-    return pd.DataFrame(data)
+    return churn_model_instance
 
 
 # Mocked plot functions
@@ -89,12 +93,8 @@ def mocked_dataframe():
 @patch("churn_model.plot_barplot")
 @patch("churn_model.plot_corr_heatmap")
 def test_perform_eda(
-    mock_corr_heatmap, mock_barplot, mock_histogram, mocked_dataframe
+        mock_corr_heatmap, mock_barplot, mock_histogram, churn_model_instance
 ):
-    # Create an instance of ChurnModel with the mocked dataframe
-    churn_model_instance = cls.ChurnModel()
-    churn_model_instance.dataframe = mocked_dataframe
-
     # Call the perform_eda method with a custom output path
     eda_output_path = "test_output/"
     churn_model_instance.perform_eda(eda_output_path)
@@ -102,31 +102,61 @@ def test_perform_eda(
     # Assert that the functions were called with the expected arguments
     for num_feature in churn_model_instance.numerical_features:
         mock_histogram.assert_any_call(
-            dataframe=mocked_dataframe,
+            dataframe=churn_model_instance.dataframe,
             column=num_feature,
             output_path=eda_output_path
         )
 
     for cat_feature in churn_model_instance.categorical_features:
         mock_barplot.assert_any_call(
-            dataframe=mocked_dataframe,
+            dataframe=churn_model_instance.dataframe,
             column=cat_feature,
             output_path=eda_output_path
         )
 
     mock_corr_heatmap.assert_called_once_with(
-        dataframe=mocked_dataframe,
+        dataframe=churn_model_instance.dataframe,
         output_path=eda_output_path
     )
+
+
 # def test_eda():
 #     """
 #     Test perform eda function
 #     """
 #
 #
-# def test_encoder_helper(encoder_helper):
-#     """test encoder helper"""
-#
+def test_col_presence_encoder_helper(churn_model_instance):
+    """test encoder helper if creates columns and save it to dataframe"""
+    # Call the encode_cat_features method with the given category_list
+    category_list = ['Category1', 'Category2']
+    churn_model_instance.encode_cat_features(category_list)
+
+    # Check if new columns have been added
+    for column in category_list:
+        new_column = column + '_Churn'
+        assert new_column in churn_model_instance.dataframe.columns
+
+
+def test_col_data_encoder_helper(churn_model_instance):
+    """test encoder helper if data in new columns is correct"""
+    # Call the encode_cat_features method with the given category_list
+    category_list = ['Category1', 'Category2']
+    churn_model_instance.encode_cat_features(category_list)
+
+    # Check the correctness of the encoding
+    expected_result = {
+        'Category1_Churn': [0.33333, 0.66667, 0.33333, 0.5, 0.66667, 0.5, 0.33333, 0.66667],
+        'Category2_Churn': [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
+    }
+    for col, expected_values in expected_result.items():
+        np.testing.assert_almost_equal(
+            actual=list(churn_model_instance.dataframe[col]),
+            desired=expected_values,
+            decimal=5
+        )
+
+
 # def test_perform_feature_engineering(perform_feature_engineering):
 #     """test perform_feature_engineering"""
 #
