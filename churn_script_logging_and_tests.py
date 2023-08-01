@@ -6,6 +6,7 @@ Author: Arkadiusz Modzelewski
 import logging
 import pytest
 import churn_model as cls
+from unittest.mock import patch, MagicMock
 
 logging.basicConfig(
     filename='./logs/churn_library.log',
@@ -67,7 +68,56 @@ def test_import_check_dropped_cols(imported_data):
         )
         raise err
 
+# Mocked Dataframe for testing
+@pytest.fixture
+def mocked_dataframe():
+    # Create a mock dataframe with test data
+    # Replace this with a real dataframe containing test data
+    import pandas as pd
 
+    data = {
+        "Column1": [1, 2, 3],
+        "Column2": ["A", "B", "C"],
+        "Churn": [0, 1, 1],
+    }
+
+    return pd.DataFrame(data)
+
+
+# Mocked plot functions
+@patch("churn_model.plot_histogram")
+@patch("churn_model.plot_barplot")
+@patch("churn_model.plot_corr_heatmap")
+def test_perform_eda(
+    mock_corr_heatmap, mock_barplot, mock_histogram, mocked_dataframe
+):
+    # Create an instance of ChurnModel with the mocked dataframe
+    churn_model_instance = cls.ChurnModel()
+    churn_model_instance.dataframe = mocked_dataframe
+
+    # Call the perform_eda method with a custom output path
+    eda_output_path = "test_output/"
+    churn_model_instance.perform_eda(eda_output_path)
+
+    # Assert that the functions were called with the expected arguments
+    for num_feature in churn_model_instance.numerical_features:
+        mock_histogram.assert_any_call(
+            dataframe=mocked_dataframe,
+            column=num_feature,
+            output_path=eda_output_path
+        )
+
+    for cat_feature in churn_model_instance.categorical_features:
+        mock_barplot.assert_any_call(
+            dataframe=mocked_dataframe,
+            column=cat_feature,
+            output_path=eda_output_path
+        )
+
+    mock_corr_heatmap.assert_called_once_with(
+        dataframe=mocked_dataframe,
+        output_path=eda_output_path
+    )
 # def test_eda():
 #     """
 #     Test perform eda function
@@ -76,7 +126,6 @@ def test_import_check_dropped_cols(imported_data):
 #
 # def test_encoder_helper(encoder_helper):
 #     """test encoder helper"""
-#
 #
 # def test_perform_feature_engineering(perform_feature_engineering):
 #     """test perform_feature_engineering"""
