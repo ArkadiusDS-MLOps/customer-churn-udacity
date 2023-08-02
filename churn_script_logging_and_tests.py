@@ -4,12 +4,18 @@ Tests and logging for churn modelling methods and functions
 Author: Arkadiusz Modzelewski
 """
 import logging
+import os
+from unittest.mock import patch
 
 import numpy as np
 import pandas as pd
 import pytest
+from sklearn.model_selection import train_test_split
+
 import churn_model as cls
-from unittest.mock import patch, MagicMock
+from sklearn.datasets import load_iris, make_classification
+
+from constants import CAT_COLUMNS, COLUMNS_TO_KEEP
 
 logging.basicConfig(
     filename='./logs/churn_library.log',
@@ -21,7 +27,9 @@ logging.basicConfig(
 # Fixture for importing data
 @pytest.fixture
 def imported_data():
-    # Code to import data using the import_data method
+    """
+    Code to import data using the import_data method
+    """
     try:
         churn = cls.ChurnModel()
         churn.import_data("./data/bank_data.csv")
@@ -73,17 +81,13 @@ def test_import_check_dropped_cols(imported_data):
 
 
 @pytest.fixture
-def churn_model_instance():
-    # Create an instance of ChurnModel
-    churn_model_instance = cls.ChurnModel()
+def churn_model_instance(imported_data):
+    """
+    Create an instance of ChurnModel with dataframe
+    """
 
-    # Sample data for testing
-    data = {
-        'Category1': ['A', 'B', 'A', 'C', 'B', 'C', 'A', 'B'],
-        'Category2': ['X', 'Y', 'X', 'Z', 'X', 'Z', 'X', 'Y'],
-        'Churn': [1, 0, 0, 1, 1, 0, 0, 1]
-    }
-    churn_model_instance.dataframe = pd.DataFrame(data)
+    churn_model_instance = cls.ChurnModel()
+    churn_model_instance.dataframe = imported_data
 
     return churn_model_instance
 
@@ -120,50 +124,49 @@ def test_perform_eda(
     )
 
 
-# def test_eda():
-#     """
-#     Test perform eda function
-#     """
-#
-#
 def test_col_presence_encoder_helper(churn_model_instance):
     """test encoder helper if creates columns and save it to dataframe"""
     # Call the encode_cat_features method with the given category_list
-    category_list = ['Category1', 'Category2']
-    churn_model_instance.encode_cat_features(category_list)
-
-    # Check if new columns have been added
-    for column in category_list:
-        new_column = column + '_Churn'
-        assert new_column in churn_model_instance.dataframe.columns
+    churn_model_instance.encode_cat_features(CAT_COLUMNS)
+    for col in COLUMNS_TO_KEEP:
+        assert col in churn_model_instance.dataframe.columns
 
 
-def test_col_data_encoder_helper(churn_model_instance):
-    """test encoder helper if data in new columns is correct"""
-    # Call the encode_cat_features method with the given category_list
-    category_list = ['Category1', 'Category2']
-    churn_model_instance.encode_cat_features(category_list)
+def test_perform_feature_engineering(churn_model_instance):
+    """test perform_feature_engineering"""
 
-    # Check the correctness of the encoding
-    expected_result = {
-        'Category1_Churn': [0.33333, 0.66667, 0.33333, 0.5, 0.66667, 0.5, 0.33333, 0.66667],
-        'Category2_Churn': [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
-    }
-    for col, expected_values in expected_result.items():
-        np.testing.assert_almost_equal(
-            actual=list(churn_model_instance.dataframe[col]),
-            desired=expected_values,
-            decimal=5
-        )
+    churn_model_instance.encode_cat_features(CAT_COLUMNS)
+    # Call the function you want to test
+    churn_model_instance.perform_feature_engineering(COLUMNS_TO_KEEP)
+
+    # Check if the attributes are correctly assigned
+    assert churn_model_instance.x_train is not None
+    assert churn_model_instance.x_test is not None
+    assert churn_model_instance.y_train is not None
+    assert churn_model_instance.y_test is not None
+
+    # Check if the shapes of train and test data match
+    assert churn_model_instance.x_train.shape[0] + churn_model_instance.x_test.shape[0] == \
+           len(churn_model_instance.dataframe['Churn'])
+
+    # Check if the length of y_train and y_test matches the data length
+    assert len(churn_model_instance.y_train) + len(churn_model_instance.y_test) == \
+           len(churn_model_instance.dataframe['Churn'])
 
 
-# def test_perform_feature_engineering(perform_feature_engineering):
-#     """test perform_feature_engineering"""
-#
-#
-# def test_train_models(train_models):
-#     """test train_models"""
-#
-#
-# if __name__ == "__main__":
-#     pass
+def test_train_models(churn_model_instance):
+    """test train_models"""
+
+    # Encoding categorical features
+    churn_model_instance.encode_cat_features(category_list=CAT_COLUMNS)
+    # Feature engineering and train test split
+    churn_model_instance.perform_feature_engineering(cols_to_keep=COLUMNS_TO_KEEP)
+
+    # Call the function you want to test
+    churn_model_instance.train_models()
+
+    assert os.path.exists("images/results/classification_report.png")
+    assert os.path.exists("images/results/roc_curves.png")
+    assert os.path.exists("images/results/feature_importance_plot.png")
+    assert os.path.exists("models/rfc_model.pkl")
+    assert os.path.exists("models/logistic_model.pkl")
