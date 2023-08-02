@@ -48,6 +48,7 @@ def test_import_check_shape(imported_data):
     try:
         assert imported_data.shape[0] > 0
         assert imported_data.shape[1] > 0
+        logging.info("Test import_check_shape: SUCCESS")
     except AssertionError as err:
         logging.error("Testing import_data: The file doesn't appear to have rows and columns")
         raise err
@@ -60,6 +61,7 @@ def test_import_check_target(imported_data):
 
     try:
         assert 'Churn' in list(imported_data.columns)
+        logging.info("Test import_check_target: SUCCESS")
     except AssertionError as err:
         logging.error("Testing import_data:Target variable was not created")
         raise err
@@ -73,6 +75,7 @@ def test_import_check_dropped_cols(imported_data):
     try:
         assert 'Attrition_Flag' not in list(imported_data.columns)
         assert 'Unnamed: 0' not in list(imported_data.columns)
+        logging.info("Test import_check_dropped_cols: SUCCESS")
     except AssertionError as err:
         logging.error(
             "Testing import_data:'Unnamed: 0' or 'Attrition_Flag' columns was not deleted"
@@ -104,24 +107,44 @@ def test_perform_eda(
     churn_model_instance.perform_eda(eda_output_path)
 
     # Assert that the functions were called with the expected arguments
-    for num_feature in churn_model_instance.numerical_features:
-        mock_histogram.assert_any_call(
+    try:
+        for num_feature in churn_model_instance.numerical_features:
+            mock_histogram.assert_any_call(
+                dataframe=churn_model_instance.dataframe,
+                column=num_feature,
+                output_path=eda_output_path
+            )
+        logging.info("Testing plot_histogram: calling function SUCCESS")
+    except AssertionError as err:
+        logging.error(
+            "Testing plot_histogram: calling function FAILED"
+        )
+        raise err
+    try:
+        for cat_feature in churn_model_instance.categorical_features:
+            mock_barplot.assert_any_call(
+                dataframe=churn_model_instance.dataframe,
+                column=cat_feature,
+                output_path=eda_output_path
+            )
+        logging.info("Testing plot_barplot: calling function SUCCESS")
+    except AssertionError as err:
+        logging.error(
+            "Testing plot_barplot: calling function FAILED"
+        )
+        raise err
+    try:
+
+        mock_corr_heatmap.assert_called_once_with(
             dataframe=churn_model_instance.dataframe,
-            column=num_feature,
             output_path=eda_output_path
         )
-
-    for cat_feature in churn_model_instance.categorical_features:
-        mock_barplot.assert_any_call(
-            dataframe=churn_model_instance.dataframe,
-            column=cat_feature,
-            output_path=eda_output_path
+        logging.info("Testing plot_corr_heatmap: calling function SUCCESS")
+    except AssertionError as err:
+        logging.error(
+            "Testing plot_corr_heatmap: calling function FAILED"
         )
-
-    mock_corr_heatmap.assert_called_once_with(
-        dataframe=churn_model_instance.dataframe,
-        output_path=eda_output_path
-    )
+        raise err
 
 
 def test_col_presence_encoder_helper(churn_model_instance):
