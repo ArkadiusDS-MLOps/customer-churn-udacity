@@ -1,0 +1,26 @@
+2023-08-02 11:15:28,066 - root - INFO - SUCCESS: Test import_check_shape
+2023-08-02 11:15:28,066 - root - INFO - SUCCESS: Test import_check_target
+2023-08-02 11:15:28,066 - root - INFO - SUCCESS: Test import_check_dropped_cols
+2023-08-02 11:15:32,595 - root - INFO - SUCCESS: Testing perform_eda
+2023-08-02 11:15:33,075 - root - INFO - SUCCESS: Testing col_presence_encoder_helper: Customer_Age available
+2023-08-02 11:15:33,075 - root - INFO - SUCCESS: Testing col_presence_encoder_helper: Dependent_count available
+2023-08-02 11:15:33,075 - root - INFO - SUCCESS: Testing col_presence_encoder_helper: Months_on_book available
+2023-08-02 11:15:33,075 - root - INFO - SUCCESS: Testing col_presence_encoder_helper: Total_Relationship_Count available
+2023-08-02 11:15:33,075 - root - INFO - SUCCESS: Testing col_presence_encoder_helper: Months_Inactive_12_mon available
+2023-08-02 11:15:33,075 - root - INFO - SUCCESS: Testing col_presence_encoder_helper: Contacts_Count_12_mon available
+2023-08-02 11:15:33,075 - root - INFO - SUCCESS: Testing col_presence_encoder_helper: Credit_Limit available
+2023-08-02 11:15:33,075 - root - INFO - SUCCESS: Testing col_presence_encoder_helper: Total_Revolving_Bal available
+2023-08-02 11:15:33,075 - root - INFO - SUCCESS: Testing col_presence_encoder_helper: Avg_Open_To_Buy available
+2023-08-02 11:15:33,075 - root - INFO - SUCCESS: Testing col_presence_encoder_helper: Total_Amt_Chng_Q4_Q1 available
+2023-08-02 11:15:33,075 - root - INFO - SUCCESS: Testing col_presence_encoder_helper: Total_Trans_Amt available
+2023-08-02 11:15:33,075 - root - INFO - SUCCESS: Testing col_presence_encoder_helper: Total_Trans_Ct available
+2023-08-02 11:15:33,075 - root - INFO - SUCCESS: Testing col_presence_encoder_helper: Total_Ct_Chng_Q4_Q1 available
+2023-08-02 11:15:33,075 - root - INFO - SUCCESS: Testing col_presence_encoder_helper: Avg_Utilization_Ratio available
+2023-08-02 11:15:33,075 - root - INFO - SUCCESS: Testing col_presence_encoder_helper: Gender_Churn available
+2023-08-02 11:15:33,075 - root - INFO - SUCCESS: Testing col_presence_encoder_helper: Education_Level_Churn available
+2023-08-02 11:15:33,075 - root - INFO - SUCCESS: Testing col_presence_encoder_helper: Marital_Status_Churn available
+2023-08-02 11:15:33,075 - root - INFO - SUCCESS: Testing col_presence_encoder_helper: Income_Category_Churn available
+2023-08-02 11:15:33,075 - root - INFO - SUCCESS: Testing col_presence_encoder_helper: Card_Category_Churn available
+2023-08-02 11:15:33,476 - root - INFO - SUCCESS: Testing perform_feature_engineering: x_train, x_test, y_train, y_test available
+2023-08-02 11:15:33,476 - root - INFO - SUCCESS: Testing perform_feature_engineering: train and test data match 
+2023-08-02 11:16:05,926 - root - INFO - SUCCESS: Testing train_models
