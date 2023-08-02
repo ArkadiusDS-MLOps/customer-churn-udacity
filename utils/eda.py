@@ -73,4 +73,4 @@ def plot_corr_heatmap(dataframe: pd.DataFrame, output_path: str) -> None:
     plt.figure(figsize=(20, 20))
     sns.heatmap(dataframe.corr(), annot=False, cmap='Dark2_r', linewidths=2)
     # Save the histogram
-    plt.savefig(output_path)
+    plt.savefig(output_path + "correlation_heatmap.png")
