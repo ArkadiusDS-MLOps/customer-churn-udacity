@@ -18,30 +18,62 @@ The code complete data science solution process including:
 Overview of the files and data present in the root directory.
 
 ### Files 
-
-`├──` Guide.ipynb          # Given: Getting started and troubleshooting tips \
-`├──` churn_notebook.ipynb # Given: Contains the code to be refactored\
-`├──` churn_library.py     # Created: Running main pipeline of ML task\
-`├──` churn_model.py       # Created: Class for churn modelling with all required methods\
-`├──`churn_script_logging_and_tests.py # Created: Tests and logs\
-`├──` constants.py         # Created: constants\
-`├──` utils                # Created: helper functions for eda and training and evaluation\
-`│`   `├──` eda.py \
-`│`   `└──` training_and_evaluation.py\
-`├──` data                 # Data used for project\
-`│`  `└──` bank_data.csv\
-`├──` images               # Directory to store EDA plots and results\
-`│`   `├──` eda\
-`│`   `└──` results\
-`├──` logs				 # Directory to store logs\
-`├──` models              # Directory to store models\
-`└──`README.md            # Provides project overview, and instructions to use the code\
+```
+├── Guide.ipynb          # Given: Getting started and troubleshooting tips 
+├── churn_notebook.ipynb # Given: Contains the code to be refactored
+├── churn_library.py     # Created: Running main pipeline of ML task
+├── churn_model.py       # Created: Class for churn modelling with all required methods
+├── churn_script_logging_and_tests.py # Created: Tests and logs
+├── constants.py         # Created: constants
+├── utils                # Created: helper functions for eda and training and evaluation
+│   ├── eda.py 
+│   └── training_and_evaluation.py
+├── data                 # Data used for project
+│   └── bank_data.csv
+├── images               # Directory to store EDA plots and results
+│   ├── eda
+│   └── results
+├── logs				 # Directory to store logs
+├── models              # Directory to store models
+└── README.md            # Provides project overview, and instructions to use the code
+```
 
 ### About Dataset
 A manager at the bank is disturbed with more and more customers leaving their credit card services. They would really appreciate if one could predict for them who is gonna get churned so they can proactively go to the customer to provide them better services and turn customers' decisions in the opposite direction
 this dataset consists of 10,000 customers mentioning their age, salary, marital_status, credit card limit, credit card category
+
 ## Running Files
 How do you run your files? What should happen when you run your files?
 
+### Clone the project
 
+To clone this project, you have to have git installed first. Then, run this command
+
+```
+git clone https://github.com/ArkadiusDS-MLOps/customer-churn-udacity.git
+```
+
+### Training
+
+To run the training pipeline, run the `churn_library.py`. You can do in your terminal using command bellow:
+
+```
+python3 churn_library.py
+```
+
+### Testing
+
+Firstly, make sure that you have pytest install in your environment. If you already hae it you can run command in your terminal as written below:  
+
+```
+pytest churn_script_logging_and_tests.py
+```
+
+### Logging
+
+To get logging infos, run the `churn_script_logging_and_tests.py`. You can do in your terminal using command bellow:
+
+```
+python3 churn_script_logging_and_tests.py
+```
 
